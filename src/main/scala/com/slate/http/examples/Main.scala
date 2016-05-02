@@ -84,3 +84,20 @@ object Main extends App with Config {
     Http().bindAndHandleSync(handler = requestHandler, interface = interface, port = port)
   }
 }
+/*
+* How to create a .jar using IntelliJ IDEA 14.1.5:
+
+File > Save All.
+Run driver or class with main method.
+File > Project Structure.
+Select Tab "Artifacts".
+Click green plus button near top of window.
+Select JAR from Add drop down menu. Select "From modules with dependencies"
+Select main class.
+The radio button should be selecting "extract to the target JAR." Press OK.
+Check the box "Build on make"
+Press apply and OK.
+From the main menu, select the build dropdown.
+Select the option build artifacts.
+
+*/

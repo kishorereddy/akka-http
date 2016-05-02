@@ -1,4 +1,4 @@
-name := "Instagram-pics-filter"
+name := "slate.http.restapi"
 
 organization  := "com.kishore.reddy"
 
