@@ -1,4 +1,6 @@
-# Akka HTTP REST Example - Simple examples of building Rest api in Akka Http using Scala.
+# Akka HTTP REST Example 
+
+Simple examples of building Rest api in Akka Http using Scala.
 
 # Copyright
 
