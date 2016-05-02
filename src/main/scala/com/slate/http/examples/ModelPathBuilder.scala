@@ -11,6 +11,8 @@
 
 package com.slate.http.examples
 
+import scala.collection.immutable.Map
+import akka.http.scaladsl.model.{Uri, HttpRequest}
 import akka.http.scaladsl.server.{RouteConcatenation, PathMatcher, Route, Directive}
 import akka.http.scaladsl.server.directives.{RouteDirectives, PathDirectives}
 
@@ -23,10 +25,34 @@ object ModelPathBuilder extends PathDirectives with RouteDirectives with RouteCo
    * @note : this builder must implement RouteConcatenation to use the "~"
    */
   def buildPathsForModel(model:String):Route = {
-    var paths =  path ( model / "create" ) { complete ( model + " - create") }
-    paths = paths.~( path ( model / "retrieve") { complete ( model + " - retrieve") } )
-    paths = paths.~( path ( model / "update"  ) { complete ( model + " - update")   } )
-    paths = paths.~( path ( model / "delete"  ) { complete ( model + " - delete")   } )
+    var paths =  path ( model / "create" )      { complete ( model + " - create")   }
+    paths = paths ~  path ( model / "retrieve") { complete ( model + " - retrieve") }
+    paths = paths ~  path ( model / "update"  ) { complete ( model + " - update")   }
+    paths = paths ~  path ( model / "delete"  ) { complete ( model + " - delete")   }
+    paths = paths ~  path ( model / "info"   )  { ctx => ctx.complete(buildInfo(ctx.request))}
     paths
+  }
+
+
+  def buildInfo(req: HttpRequest): String =
+  {
+    val nl = "\r\n"
+    val result = "uri.host     : " + req.getUri().host() + nl +
+                 "uri.path     : " + req.getUri().path() + nl +
+                 "uri.port     : " + req.getUri().port() + nl +
+                 "uri.params   : " + buildParams(req.getUri() ) + nl +
+                 "uri.query    : " + req.getUri().queryString() + nl +
+                 "uri.scheme   : " + req.getUri().scheme() + nl +
+                 "uri.userinfo : " + req.getUri().userInfo() + nl
+    result
+  }
+
+
+  def buildParams( uri: akka.http.javadsl.model.Uri ) : String =
+  {
+    val params = uri.parameterMap()
+    if(params.containsKey("name")) return params.get("name")
+
+    "none"
   }
 }
