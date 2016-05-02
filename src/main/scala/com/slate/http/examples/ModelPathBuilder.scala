@@ -23,6 +23,10 @@ object ModelPathBuilder extends PathDirectives with RouteDirectives with RouteCo
    * @note : this builder must implement RouteConcatenation to use the "~"
    */
   def buildPathsForModel(model:String):Route = {
+    var paths =  path ( model / "create" ) { complete ( model + " - create") }
+    paths = paths.~( path ( model / "retrieve") { complete ( model + " - retrieve") } )
+    paths = paths.~( path ( model / "update"  ) { complete ( model + " - update")   } )
+    paths = paths.~( path ( model / "delete"  ) { complete ( model + " - delete")   } )
     paths
   }
 }

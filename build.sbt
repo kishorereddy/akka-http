@@ -1,5 +1,6 @@
 name := "Instagram-pics-filter"
 
+organization  := "com.kishore.reddy"
 
 version := "0.0.1"
 
