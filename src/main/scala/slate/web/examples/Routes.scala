@@ -18,7 +18,7 @@ import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.directives.{MarshallingDirectives, MethodDirectives, PathDirectives, RouteDirectives}
 import slate.common.{Host, Lang, About, Reflect}
 import slate.core.app.AppSupport
-import slate.web.core.{Auth, Utils}
+import slate.web.core.{Res, Auth, Utils}
 
 import scala.reflect.runtime.{universe => ru}
 import ru._
@@ -29,6 +29,7 @@ object Routes extends PathDirectives
     with RouteConcatenation
     with MethodDirectives
     with MarshallingDirectives
+    with Res
 {
 
   /**
@@ -133,10 +134,15 @@ object Routes extends PathDirectives
   def exampleWithAppendingRoutes(route:Route, app:AppSupport):Route = {
 
     // lets add some admin specific routes
-    val paths = route ~
-      path ( "admin" / "status" / "about"   ) { complete ( Reflect.getFields2(app.about )) } ~
-      path ( "admin" / "status" / "host"    ) { complete ( Reflect.getFields2(app.host  ) ) } ~
-      path ( "admin" / "status" / "lang"    ) { complete ( Reflect.getFields2(app.lang  ) ) }
+    // HttpEntity(`application/json`, error._2)
+    val paths = route ~ post
+    {
+      path ( "admin" / "status" / "about"   ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, Reflect.asHtmlTable(app.about ) ) ) } ~
+      path ( "admin" / "status" / "host"    ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, Reflect.asHtmlTable(app.host  ) ) ) } ~
+      path ( "admin" / "status" / "lang"    ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, Reflect.asHtmlTable(app.lang  ) ) ) } ~
+      path ( "admin" / "status" / "info"    ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, Reflect.asHtmlTable(app.info()) ) ) } ~
+      path ( "admin" / "status" / "infojs"  ) { ctx => Auth.authorize( ctx, (c) => completeAsJson(c, Reflect.asJson(app.info()     ) ) ) }
+    }
 
     paths
   }

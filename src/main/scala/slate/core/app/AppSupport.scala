@@ -11,7 +11,9 @@
 
 package slate.core.app
 
-import slate.common.{About, Lang, Host}
+import slate.common.{Reflect, About, Lang, Host}
+
+import scala.collection.mutable.ListBuffer
 
 trait AppSupport {
 
@@ -29,4 +31,16 @@ trait AppSupport {
   def about: About = _about
   def host: Host =  _host
   def lang: Lang =  _lang
+
+
+  def info() : List[(String,Any)] = {
+    val items = new ListBuffer[(String,Any)]
+    items.append(("ABOUT", "==================================="))
+    for((k,v) <- Reflect.getFields(about)) { items.append((k,v)) }
+    items.append(("HOST", "==================================="))
+    for((k,v) <- Reflect.getFields(host)) { items.append((k,v)) }
+    items.append(("LANG", "==================================="))
+    for((k,v) <- Reflect.getFields(lang)) { items.append((k,v)) }
+    items.toList
+  }
 }
