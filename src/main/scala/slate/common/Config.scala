@@ -1,4 +1,4 @@
-package com.slate.http.core
+package slate.common
 
 import com.typesafe.config.ConfigFactory
 
