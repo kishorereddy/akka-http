@@ -20,7 +20,7 @@ This sample app shows simple example of how to do the following in Akka Http
 # Setup
 - Option 1: Run the app in intellij
 - Option 2: Run "sbt run" on command line in root directory
-- 
+
 
 # Output
 There are several routes available to show examples of Akka Http usage.
