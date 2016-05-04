@@ -9,11 +9,15 @@
 </slate_header>
   */
 
-package slate.web.core
+package slate.http
 
 import akka.http.scaladsl.model.HttpRequest
 
-object Utils {
+
+/**
+ * Akka Http utilities
+ */
+object HttpUtils {
 
   def buildUriParts(req: HttpRequest): String =
   {

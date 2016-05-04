@@ -1,15 +1,12 @@
-package slate.web.examples
+package slate.app
 
 import akka.actor.ActorSystem
 import akka.event.{Logging, LoggingAdapter}
-import akka.http.scaladsl.{server, Http}
-import akka.http.scaladsl.model.HttpMethods._
+import akka.http.scaladsl.{Http}
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
-import slate.common.{About, Config}
-import slate.core.app.AppSupport
+import slate.common.{AppSupport, About, Config}
 
 import scala.concurrent.ExecutionContext
 
@@ -52,10 +49,16 @@ object WebApp extends App with Config with AppSupport {
   }
 
 
-  def startup(callback:() => Unit) : Unit =
+  /**
+   * startup with life-cycle hooks.
+   * @param startCallback
+   */
+  def startup(startCallback:() => Unit) : Unit =
   {
     init()
-    callback()
+    onBeforeStartup()
+    startCallback()
+    onAfterStartup()
   }
 
 
@@ -97,6 +100,24 @@ object WebApp extends App with Config with AppSupport {
     val routes = Routes.exampleWithModel("users")
     val finalRoutes = Routes.exampleWithAppendingRoutes(routes, this)
     Http().bindAndHandle(handler = finalRoutes, interface = _interface, port = _port)
+  }
+
+
+  /**
+   * called on before the routes are setup and server is listening for requests
+   */
+  def onBeforeStartup():Unit =
+  {
+    println("before startup")
+  }
+
+
+  /**
+   * called on after the routes are setup and server is listening for requests
+    */
+  def onAfterStartup():Unit =
+  {
+    println("after startup")
   }
 }
 

@@ -9,8 +9,13 @@
 </slate_header>
   */
 
-package slate.web.examples
+package slate.app
 
+/**
+ * Sample domain class for showing the model / crud api operations
+ * @param id
+ * @param name
+ */
 case class User(id: String, name: String) {
 
 }

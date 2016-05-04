@@ -9,17 +9,23 @@
 </slate_header>
   */
 
-package slate.web.core
+package slate.app
 
-import akka.http.scaladsl.server.{RouteResult, RequestContext}
-
+import akka.http.scaladsl.server.{RequestContext, RouteResult}
 import scala.concurrent.Future
+
 
 object Auth {
 
   val password = "ABC123"
 
 
+  /**
+   * simple authorization mechanism for this example app
+   * @param ctx      : The Akka http request context
+   * @param callback : Callback that build the Future result to return
+   * @return
+   */
   def authorize(ctx:RequestContext, callback:(RequestContext) => Future[RouteResult]): Future[RouteResult] =
   {
     val req = ctx.request

@@ -9,21 +9,23 @@
 </slate_header>
   */
 
-package slate.web.core
+package slate.http
 
-import akka.http.scaladsl.server.RouteResult
 import akka.http.scaladsl.model.HttpEntity
-import akka.http.scaladsl.server.{RequestContext}
-import akka.http.scaladsl.model.MediaTypes.`text/html`
-import akka.http.scaladsl.model.MediaTypes.`application/json`
+import akka.http.scaladsl.model.MediaTypes.{`application/json`, `text/html`}
+import akka.http.scaladsl.server.{RequestContext, RouteResult}
 
 import scala.concurrent.Future
 
-trait Res {
+/**
+ * convenience methods for returning http responses in certain formats
+ */
+trait HttpRes {
 
   def completeAsHtml(req:RequestContext, content:String) : Future[RouteResult] = {
       req.complete(HttpEntity(`text/html`, content))
   }
+
 
   def completeAsJson(req:RequestContext, content:String) : Future[RouteResult] = {
     req.complete(HttpEntity(`application/json`, content))

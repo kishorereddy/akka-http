@@ -9,19 +9,17 @@
 </slate_header>
   */
 
-package slate.web.examples
+package slate.app
 
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.{Uri, HttpResponse, HttpRequest, HttpEntity}
 import akka.http.scaladsl.server
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.directives.{MarshallingDirectives, MethodDirectives, PathDirectives, RouteDirectives}
-import slate.common.{Host, Lang, About, Reflect}
-import slate.core.app.AppSupport
-import slate.web.core.{Res, Auth, Utils}
-
+import slate.common.Serializer.{asJson, asHtmlTable}
+import slate.http.{HttpUtils, HttpRes}
 import scala.reflect.runtime.{universe => ru}
-import ru._
+import slate.common._
 
 
 object Routes extends PathDirectives
@@ -29,7 +27,7 @@ object Routes extends PathDirectives
     with RouteConcatenation
     with MethodDirectives
     with MarshallingDirectives
-    with Res
+    with HttpRes
 {
 
   /**
@@ -42,7 +40,7 @@ object Routes extends PathDirectives
     {
       // similar to "/"
       pathSingleSlash {
-        complete(HttpEntity("<html><body>Hello world 5/1!</body></html>"))
+        complete(HttpEntity("<html><body>Hello world!</body></html>"))
       } ~
         path("ping") {
           complete("PONG !!")
@@ -111,7 +109,7 @@ object Routes extends PathDirectives
     paths = paths ~  path ( model / "retrieve") { complete ( model + " - retrieve") }
     paths = paths ~  path ( model / "update"  ) { complete ( model + " - update")   }
     paths = paths ~  path ( model / "delete"  ) { complete ( model + " - delete")   }
-    paths = paths ~  path ( model / "info"   )  { ctx => ctx.complete(Utils.buildUriParts(ctx.request))}
+    paths = paths ~  path ( model / "info"   )  { ctx => ctx.complete(HttpUtils.buildUriParts(ctx.request))}
 
     // Post
     paths = paths ~ post {
@@ -137,11 +135,11 @@ object Routes extends PathDirectives
     // HttpEntity(`application/json`, error._2)
     val paths = route ~ post
     {
-      path ( "admin" / "status" / "about"   ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, Reflect.asHtmlTable(app.about ) ) ) } ~
-      path ( "admin" / "status" / "host"    ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, Reflect.asHtmlTable(app.host  ) ) ) } ~
-      path ( "admin" / "status" / "lang"    ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, Reflect.asHtmlTable(app.lang  ) ) ) } ~
-      path ( "admin" / "status" / "info"    ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, Reflect.asHtmlTable(app.info()) ) ) } ~
-      path ( "admin" / "status" / "infojs"  ) { ctx => Auth.authorize( ctx, (c) => completeAsJson(c, Reflect.asJson(app.info()     ) ) ) }
+      path ( "admin" / "status" / "about"   ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, asHtmlTable(app.about ) ) ) } ~
+      path ( "admin" / "status" / "host"    ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, asHtmlTable(app.host  ) ) ) } ~
+      path ( "admin" / "status" / "lang"    ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, asHtmlTable(app.lang  ) ) ) } ~
+      path ( "admin" / "status" / "info"    ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, asHtmlTable(app.info()) ) ) } ~
+      path ( "admin" / "status" / "infojs"  ) { ctx => Auth.authorize( ctx, (c) => completeAsJson(c, asJson(app.info()     ) ) ) }
     }
 
     paths
