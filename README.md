@@ -18,7 +18,11 @@ This sample app shows simple example of how to do the following in Akka Http
 
 
 # Output
+There are several routes available to show examples of Akka Http usage.
+The following route ( accessed via http post - using Postman ) will provide a summary of your app, host, and scala runtime.
+
 http://localhost:9911/admin/status/info
+
 ```scala
 ABOUT	===================================
 desc	Show various ways to setup routes, web apis, and some general patterns and practices
