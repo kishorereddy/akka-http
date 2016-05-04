@@ -1,12 +1,12 @@
 /**
-<slate_header>
-  author: Kishore Reddy
-  url: https://github.com/kishorereddy/scala-slate
-  copyright: 2015 Kishore Reddy
-  license: https://github.com/kishorereddy/scala-slate/blob/master/LICENSE.md
-  desc: a scala micro-framework
-  usage: Please refer to license on github for more info.
-</slate_header>
+  * <slate_header>
+  * author: Kishore Reddy
+  * url: https://github.com/kishorereddy/scala-slate
+  * copyright: 2015 Kishore Reddy
+  * license: https://github.com/kishorereddy/scala-slate/blob/master/LICENSE.md
+  * desc: a scala micro-framework
+  * usage: Please refer to license on github for more info.
+  * </slate_header>
   */
 
 package slate.app
@@ -15,24 +15,21 @@ import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.{Uri, HttpResponse, HttpRequest, HttpEntity}
 import akka.http.scaladsl.server
 import akka.http.scaladsl.server._
-import akka.http.scaladsl.server.directives.{MarshallingDirectives, MethodDirectives, PathDirectives, RouteDirectives}
+import akka.stream.ActorMaterializer
 import slate.common.Serializer.{asJson, asHtmlTable}
 import slate.http.{HttpUtils, HttpRes}
 import scala.reflect.runtime.{universe => ru}
 import slate.common._
 
-
-object Routes extends PathDirectives
-    with RouteDirectives
+object Routes extends Directives
     with RouteConcatenation
-    with MethodDirectives
-    with MarshallingDirectives
     with HttpRes
 {
 
   /**
    * example route setup in tree form.
-   * @return
+    *
+    * @return
    */
   def exampleWithTree() : server.Route = {
   val routes =
@@ -67,7 +64,8 @@ object Routes extends PathDirectives
 
   /**
    * example route setup with req/res cases
-   * @return
+    *
+    * @return
    */
   def exampleWithCases: (HttpRequest) => HttpResponse = {
 
@@ -94,7 +92,8 @@ object Routes extends PathDirectives
   /**
    * example route setup for a model.
    * builds up a crud path ( create, retrieve, update, delete ) for the model name specified.
-   * @param model : "user"
+    *
+    * @param model : "user"
    * @return
    * @note : this builder must implement RouteConcatenation to use the "~"
    */
@@ -105,27 +104,46 @@ object Routes extends PathDirectives
 
     // Now add additional routes for the model.
     // NOTE: Ideally post instead of get, but just for examples/demo.
-    paths = paths ~  path ( model / "create" )  { complete ( model + " - create")   }
-    paths = paths ~  path ( model / "retrieve") { complete ( model + " - retrieve") }
-    paths = paths ~  path ( model / "update"  ) { complete ( model + " - update")   }
-    paths = paths ~  path ( model / "delete"  ) { complete ( model + " - delete")   }
-    paths = paths ~  path ( model / "info"   )  { ctx => ctx.complete(HttpUtils.buildUriParts(ctx.request))}
 
-    // Post
+    // Example 1: basic - /users/create | edit via post
     paths = paths ~ post {
-      path ( model / "invite") { ctx => ctx.complete("post") }
+      path ( model / "create" ) { ctx => ctx.complete ( model + " - create"   ) } ~
+      path ( model / "update" ) { ctx => ctx.complete ( model + " - update"   ) }
     }
 
-    // Auth: api key
-    paths = paths ~ post {
-      path ( model / "auth") { ctx => Auth.authorize(ctx, (c) => c.complete("auth success!") ) }
+    // Example 2: Id - /users/get/2 via get
+    paths = paths ~  path ( model / "get"    / IntNumber ) { id  => complete ( model + " - get " + id) }
+
+    // Example 3: Show uri - /users/info?id=abc
+    paths = paths ~  path ( model / "about"   ) { ctx => ctx.complete(HttpUtils.buildUriParts(ctx.request))}
+
+    // Example 4: Post with id - /users/delete/4
+    paths = paths ~  post {
+      path(model / "delete" / IntNumber) { id => complete(model + " - delete") }
     }
+
+    // Example 5: Regex action name /users/action/anything
+    paths = paths ~ path ( model / "action" / """(\w+)""".r ) { name => complete("status : " + name ) }
+
+    // Example 6: Simple auth via an api key
+    paths = paths ~ post {
+      path ( model / "auth") { ctx => Auth.ensureApiKey(ctx, (c) => c.complete("auth success!") ) }
+    }
+
+    // Example 7: Post with data supplied
+    //paths = paths ~ post {
+    //
+    //  entity(as[User]) { user =>
+    //    complete(s"User id=${user.id}, User name=${user.name}")
+    //  }
+    //}
     paths
   }
 
 
   /**
    * Appends additional routes to the route supplied.
+   *
    * @param route
    * @return
    */
@@ -135,11 +153,11 @@ object Routes extends PathDirectives
     // HttpEntity(`application/json`, error._2)
     val paths = route ~ post
     {
-      path ( "admin" / "status" / "about"   ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, asHtmlTable(app.about ) ) ) } ~
-      path ( "admin" / "status" / "host"    ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, asHtmlTable(app.host  ) ) ) } ~
-      path ( "admin" / "status" / "lang"    ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, asHtmlTable(app.lang  ) ) ) } ~
-      path ( "admin" / "status" / "info"    ) { ctx => Auth.authorize( ctx, (c) => completeAsHtml(c, asHtmlTable(app.info()) ) ) } ~
-      path ( "admin" / "status" / "infojs"  ) { ctx => Auth.authorize( ctx, (c) => completeAsJson(c, asJson(app.info()     ) ) ) }
+      path ( "admin" / "status" / "about"   ) { ctx => Auth.ensureApiKey( ctx, (c) => completeAsHtml(c, asHtmlTable(app.about ) ) ) } ~
+      path ( "admin" / "status" / "host"    ) { ctx => Auth.ensureApiKey( ctx, (c) => completeAsHtml(c, asHtmlTable(app.host  ) ) ) } ~
+      path ( "admin" / "status" / "lang"    ) { ctx => Auth.ensureApiKey( ctx, (c) => completeAsHtml(c, asHtmlTable(app.lang  ) ) ) } ~
+      path ( "admin" / "status" / "info"    ) { ctx => Auth.ensureApiKey( ctx, (c) => completeAsHtml(c, asHtmlTable(app.info()) ) ) } ~
+      path ( "admin" / "status" / "infojs"  ) { ctx => Auth.ensureApiKey( ctx, (c) => completeAsJson(c, asJson(app.info()     ) ) ) }
     }
 
     paths

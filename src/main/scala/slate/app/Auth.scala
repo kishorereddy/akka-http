@@ -17,7 +17,7 @@ import scala.concurrent.Future
 
 object Auth {
 
-  val password = "ABC123"
+  val key = "ABC123"
 
 
   /**
@@ -26,10 +26,10 @@ object Auth {
    * @param callback : Callback that build the Future result to return
    * @return
    */
-  def authorize(ctx:RequestContext, callback:(RequestContext) => Future[RouteResult]): Future[RouteResult] =
+  def ensureApiKey(ctx:RequestContext, callback:(RequestContext) => Future[RouteResult]): Future[RouteResult] =
   {
     val req = ctx.request
-    val header = req.getHeader("user-token")
+    val header = req.getHeader("api-key")
 
     // Missing header ?
     if (!header.isDefined)
@@ -40,7 +40,7 @@ object Auth {
     if(value == null || value == "")
       return ctx.complete("Unauthorized")
 
-    if(value != password)
+    if(value != key)
       return ctx.complete("Unauthorized")
 
     callback(ctx)

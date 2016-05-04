@@ -11,11 +11,19 @@
 
 package slate.app
 
+import spray.json.DefaultJsonProtocol
+
 /**
  * Sample domain class for showing the model / crud api operations
- * @param id
+  *
+  * @param id
  * @param name
  */
 case class User(id: String, name: String) {
 
+}
+
+
+object JsonImplicits extends DefaultJsonProtocol  {
+  implicit val impUser = jsonFormat2(User)
 }
