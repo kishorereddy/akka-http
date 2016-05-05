@@ -2,13 +2,24 @@ package slate.app
 
 import akka.actor.ActorSystem
 import akka.event.{Logging, LoggingAdapter}
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.{Http}
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.{Directives, Route}
 import akka.stream.ActorMaterializer
 import slate.common.{AppSupport, About, Config}
+import spray.json.{JsValue, DefaultJsonProtocol}
 
 import scala.concurrent.ExecutionContext
+
+
+case class Person(name: String, favoriteNumber: Int)
+
+object PersonJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
+  implicit val PortofolioFormats = jsonFormat2(Person)
+}
+
+import PersonJsonSupport._
 
 
 /**
@@ -17,7 +28,7 @@ import scala.concurrent.ExecutionContext
  * https://github.com/dnvriend/akka-http-test
  * http://chariotsolutions.com/blog/post/akka-http-getting-started/
  */
-object WebApp extends App with Config with AppSupport {
+object WebApp extends App with Config with AppSupport with  Directives {
 
   private implicit val system = ActorSystem()
   protected implicit val executor: ExecutionContext = system.dispatcher
@@ -28,7 +39,7 @@ object WebApp extends App with Config with AppSupport {
 
 
   // start the server
-  startup( () => setupViaChaining() )
+  startup( () => setupPost() )
 
 
   override def init() : Unit =
@@ -51,7 +62,8 @@ object WebApp extends App with Config with AppSupport {
 
   /**
    * startup with life-cycle hooks.
-   * @param startCallback
+    *
+    * @param startCallback
    */
   def startup(startCallback:() => Unit) : Unit =
   {
@@ -59,6 +71,27 @@ object WebApp extends App with Config with AppSupport {
     onBeforeStartup()
     startCallback()
     onAfterStartup()
+  }
+
+
+  def setupPost():Unit = {
+
+    val route = path("users" / "create") {
+      post {
+        entity(as[Person]) { person =>
+          complete(s"Person: ${person.name} - favorite number: ${person.favoriteNumber}")
+        }
+      }
+    } ~
+    path("invites" / "create") {
+      post {
+        entity(as[JsValue]) { jsData =>
+          complete("with json data: " + jsData.toString())
+        }
+      }
+    }
+
+    Http().bindAndHandle(handler = route, interface = _interface, port = _port)
   }
 
 

@@ -11,15 +11,18 @@
 
 package slate.app
 
+
+import java.time.LocalDateTime
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.{Uri, HttpResponse, HttpRequest, HttpEntity}
 import akka.http.scaladsl.server
 import akka.http.scaladsl.server._
-import akka.stream.ActorMaterializer
 import slate.common.Serializer.{asJson, asHtmlTable}
 import slate.http.{HttpUtils, HttpRes}
+import spray.json.{DefaultJsonProtocol, JsValue}
 import scala.reflect.runtime.{universe => ru}
 import slate.common._
+
 
 object Routes extends Directives
     with RouteConcatenation
@@ -40,7 +43,7 @@ object Routes extends Directives
         complete(HttpEntity("<html><body>Hello world!</body></html>"))
       } ~
         path("ping") {
-          complete("PONG !!")
+          complete("PONG !! " + LocalDateTime.now().toString())
         } ~
         path("users" / "register") {
           complete("REGISTER !!")
@@ -54,7 +57,7 @@ object Routes extends Directives
         }
     } ~
       post {
-        path("users/delete") {
+        path("users/getAll") {
           complete("post only")
         }
       }
@@ -125,18 +128,18 @@ object Routes extends Directives
     // Example 5: Regex action name /users/action/anything
     paths = paths ~ path ( model / "action" / """(\w+)""".r ) { name => complete("status : " + name ) }
 
-    // Example 6: Simple auth via an api key
+    // Example 7: Simple auth via an api key
     paths = paths ~ post {
       path ( model / "auth") { ctx => Auth.ensureApiKey(ctx, (c) => c.complete("auth success!") ) }
     }
 
     // Example 7: Post with data supplied
-    //paths = paths ~ post {
-    //
-    //  entity(as[User]) { user =>
-    //    complete(s"User id=${user.id}, User name=${user.name}")
+    //val route = post {
+    //  entity(as[Person]) { person =>
+    //    complete(s"Person: ${person.name} - favorite number: ${person.favoriteNumber}")
     //  }
     //}
+
     paths
   }
 
