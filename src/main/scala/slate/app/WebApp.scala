@@ -2,14 +2,11 @@ package slate.app
 
 import akka.actor.ActorSystem
 import akka.event.{Logging, LoggingAdapter}
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.{Http}
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.{Directives, Route}
 import akka.stream.ActorMaterializer
 import slate.common.{AppSupport, About, Config}
-import slate.http.HttpJson
-import spray.json.{JsValue, DefaultJsonProtocol}
 
 import scala.concurrent.ExecutionContext
 
@@ -23,10 +20,10 @@ import scala.concurrent.ExecutionContext
  */
 object WebApp extends App with Config with AppSupport with  Directives {
 
-  private implicit val system = ActorSystem()
+  private   implicit val system = ActorSystem()
   protected implicit val executor: ExecutionContext = system.dispatcher
-  protected val log: LoggingAdapter = Logging(system, getClass)
   protected implicit val materializer: ActorMaterializer = ActorMaterializer()
+  protected val log: LoggingAdapter = Logging(system, getClass)
   protected val _interface = "0.0.0.0"
   protected val _port = 9911
 
@@ -50,6 +47,10 @@ object WebApp extends App with Config with AppSupport with  Directives {
       version = "1.0.1.7",
       tags = "scala,akka,akka-http,web,apis,routes"
     )
+
+    // Initialize the routes with the implicits so
+    // that it can handle the deserialization of json data in HttpEntity.
+    Routes.init(system, executor, materializer)
   }
 
 
@@ -102,19 +103,8 @@ object WebApp extends App with Config with AppSupport with  Directives {
    */
   def setupViaChaining(): Unit =
   {
-    import HttpJson._
-
     var routes = Routes.exampleWithModel("users")
     routes = Routes.exampleWithAppendingRoutes(routes, this)
-
-    // Example 7: Post with json data supplied
-    routes = routes ~ path("invites" / "create") {
-      post {
-        entity(as[JsValue]) { jsData =>
-          complete("flexible json data: " + jsData.toString())
-        }
-      }
-    }
     Http().bindAndHandle(handler = routes, interface = _interface, port = _port)
   }
 

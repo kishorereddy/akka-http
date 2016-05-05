@@ -13,12 +13,16 @@ package slate.app
 
 
 import java.time.LocalDateTime
+import akka.actor.ActorSystem
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.{Uri, HttpResponse, HttpRequest, HttpEntity}
 import akka.http.scaladsl.server
 import akka.http.scaladsl.server._
+import akka.stream.ActorMaterializer
 import slate.common.Serializer.{asJson, asHtmlTable}
-import slate.http.{HttpUtils, HttpRes}
+import slate.http.{HttpJson, HttpUtils, HttpRes}
+import spray.json.JsValue
+import scala.concurrent.ExecutionContext
 import scala.reflect.runtime.{universe => ru}
 import slate.common._
 
@@ -27,7 +31,16 @@ object Routes extends Directives
     with RouteConcatenation
     with HttpRes
 {
+  implicit var system:ActorSystem = ActorSystem()
+  implicit var executor:ExecutionContext = system.dispatcher
+  implicit var materializer:ActorMaterializer = ActorMaterializer()
 
+
+  def init(actorSys:ActorSystem, exec:ExecutionContext, mat:ActorMaterializer):Unit = {
+    system = actorSys
+    executor = system.dispatcher
+    materializer = mat
+  }
 
   /**
    * example route setup in tree form.
@@ -102,6 +115,8 @@ object Routes extends Directives
    */
   def exampleWithModel(model:String):Route = {
 
+    import HttpJson._
+
     // Build on top of existing sample routes above
     var paths = exampleWithTree()
 
@@ -131,6 +146,15 @@ object Routes extends Directives
     // Example 7: Simple auth via an api key
     paths = paths ~ post {
       path ( model / "auth") { ctx => Auth.ensureApiKey(ctx, (c) => c.complete("auth success!") ) }
+    }
+
+    // Example 8: Post with json data supplied
+    paths = paths ~ path("invites" / "create") {
+      post {
+        entity(as[JsValue]) { jsData =>
+          complete("json data from routes: " + jsData.toString())
+        }
+      }
     }
 
     paths
