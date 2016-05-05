@@ -8,18 +8,11 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.{Directives, Route}
 import akka.stream.ActorMaterializer
 import slate.common.{AppSupport, About, Config}
+import slate.http.HttpJson
 import spray.json.{JsValue, DefaultJsonProtocol}
 
 import scala.concurrent.ExecutionContext
 
-
-case class Person(name: String, favoriteNumber: Int)
-
-object PersonJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
-  implicit val PortofolioFormats = jsonFormat2(Person)
-}
-
-import PersonJsonSupport._
 
 
 /**
@@ -39,7 +32,7 @@ object WebApp extends App with Config with AppSupport with  Directives {
 
 
   // start the server
-  startup( () => setupPost() )
+  startup( () => setupViaChaining() )
 
 
   override def init() : Unit =
@@ -71,27 +64,6 @@ object WebApp extends App with Config with AppSupport with  Directives {
     onBeforeStartup()
     startCallback()
     onAfterStartup()
-  }
-
-
-  def setupPost():Unit = {
-
-    val route = path("users" / "create") {
-      post {
-        entity(as[Person]) { person =>
-          complete(s"Person: ${person.name} - favorite number: ${person.favoriteNumber}")
-        }
-      }
-    } ~
-    path("invites" / "create") {
-      post {
-        entity(as[JsValue]) { jsData =>
-          complete("with json data: " + jsData.toString())
-        }
-      }
-    }
-
-    Http().bindAndHandle(handler = route, interface = _interface, port = _port)
   }
 
 
@@ -130,9 +102,20 @@ object WebApp extends App with Config with AppSupport with  Directives {
    */
   def setupViaChaining(): Unit =
   {
-    val routes = Routes.exampleWithModel("users")
-    val finalRoutes = Routes.exampleWithAppendingRoutes(routes, this)
-    Http().bindAndHandle(handler = finalRoutes, interface = _interface, port = _port)
+    import HttpJson._
+
+    var routes = Routes.exampleWithModel("users")
+    routes = Routes.exampleWithAppendingRoutes(routes, this)
+
+    // Example 7: Post with json data supplied
+    routes = routes ~ path("invites" / "create") {
+      post {
+        entity(as[JsValue]) { jsData =>
+          complete("flexible json data: " + jsData.toString())
+        }
+      }
+    }
+    Http().bindAndHandle(handler = routes, interface = _interface, port = _port)
   }
 
 

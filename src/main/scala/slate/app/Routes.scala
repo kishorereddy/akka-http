@@ -19,7 +19,6 @@ import akka.http.scaladsl.server
 import akka.http.scaladsl.server._
 import slate.common.Serializer.{asJson, asHtmlTable}
 import slate.http.{HttpUtils, HttpRes}
-import spray.json.{DefaultJsonProtocol, JsValue}
 import scala.reflect.runtime.{universe => ru}
 import slate.common._
 
@@ -28,6 +27,7 @@ object Routes extends Directives
     with RouteConcatenation
     with HttpRes
 {
+
 
   /**
    * example route setup in tree form.
@@ -132,13 +132,6 @@ object Routes extends Directives
     paths = paths ~ post {
       path ( model / "auth") { ctx => Auth.ensureApiKey(ctx, (c) => c.complete("auth success!") ) }
     }
-
-    // Example 7: Post with data supplied
-    //val route = post {
-    //  entity(as[Person]) { person =>
-    //    complete(s"Person: ${person.name} - favorite number: ${person.favoriteNumber}")
-    //  }
-    //}
 
     paths
   }

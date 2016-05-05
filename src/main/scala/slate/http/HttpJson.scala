@@ -10,11 +10,10 @@
   */
 package slate.http
 
-import slate.app.User
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json.DefaultJsonProtocol
 
-// akkaStreamVersion
 
-trait HttpJson extends DefaultJsonProtocol {
-  implicit val userFormat = jsonFormat2(User.apply)
+
+object HttpJson extends DefaultJsonProtocol with SprayJsonSupport {
 }
