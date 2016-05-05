@@ -143,6 +143,9 @@ object Routes extends Directives
     // Example 5: Regex action name /users/action/anything
     paths = paths ~ path ( model / "action" / """(\w+)""".r ) { name => complete("status : " + name ) }
 
+    // Example 6: "api/{area}/{service}/{action}
+    paths = paths ~ path ( "api" / Segment.repeat(3, separator = Slash) ) { parts => complete("parts:" + parts.toString()) }
+
     // Example 7: Simple auth via an api key
     paths = paths ~ post {
       path ( model / "auth") { ctx => Auth.ensureApiKey(ctx, (c) => c.complete("auth success!") ) }
