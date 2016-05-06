@@ -56,7 +56,7 @@ object Routes extends Directives
         complete(HttpEntity("<html><body>Hello world!</body></html>"))
       } ~
         path("ping") {
-          complete("PONG !! " + LocalDateTime.now().toString())
+          complete("DEPLOYED PONG !! " + LocalDateTime.now().toString())
         } ~
         path("users" / "register") {
           complete("REGISTER !!")

@@ -144,4 +144,36 @@ Press apply and OK.
 From the main menu, select the build dropdown.
 Select the option build artifacts.
 
+
+# Configure logging in SBT:
+sbt
+> set logLevel in run := Level.Debug
+
+
+# Classpath setup by SBT:
+[debug]   Classpath:
+C:\Dev\Tests\akka-http\target\scala-2.11\classes
+C:\Dev\Tests\akka-http\lib\akka-actor_2.11-2.3.11.jar
+C:\Dev\Tests\akka-http\lib\akka-http-core-experimental_2.11-1.0-RC4.jar
+C:\Dev\Tests\akka-http\lib\akka-http-experimental_2.11-1.0-RC4.jar
+C:\Dev\Tests\akka-http\lib\akka-http-spray-json-experimental_2.11-1.0-RC4.jar
+C:\Dev\Tests\akka-http\lib\akka-http-testkit-experimental_2.11-1.0-RC4.jar
+C:\Dev\Tests\akka-http\lib\akka-stream-experimental_2.11-1.0-RC4.jar
+C:\Dev\Tests\akka-http\lib\akka-testkit_2.11-2.3.11.jar
+C:\Dev\Tests\akka-http\lib\scala-reflect.jar
+C:\Dev\Tests\akka-http\lib\scala-xml_2.11-1.0.4.jar
+C:\Dev\Tests\akka-http\lib\slate-http-restapi_2.11-0.0.1.jar
+C:\Users\kreddy\.ivy2\cache\org.scala-lang\scala-library\jars\scala-library-2.11.6.jar
+C:\Users\kreddy\.ivy2\cache\com.typesafe.akka\akka-actor_2.11\jars\akka-actor_2.11-2.3.11.jar
+C:\Users\kreddy\.ivy2\cache\com.typesafe\config\bundles\config-1.2.1.jar
+C:\Users\kreddy\.ivy2\cache\com.typesafe.akka\akka-stream-experimental_2.11\jars\akka-stream-experimental_2.11-1.0-RC4.jar
+C:\Users\kreddy\.ivy2\cache\org.reactivestreams\reactive-streams\jars\reactive-streams-1.0.0.jar
+C:\Users\kreddy\.ivy2\cache\com.typesafe.akka\akka-http-experimental_2.11\jars\akka-http-experimental_2.11-1.0-RC4.jar
+C:\Users\kreddy\.ivy2\cache\com.typesafe.akka\akka-http-core-experimental_2.11\jars\akka-http-core-experimental_2.11-1.0-RC4.jar
+C:\Users\kreddy\.ivy2\cache\com.typesafe.akka\akka-parsing-experimental_2.11\jars\akka-parsing-experimental_2.11-1.0-RC4.jar
+C:\Users\kreddy\.ivy2\cache\com.typesafe.akka\akka-http-spray-json-experimental_2.11\jars\akka-http-spray-json-experimental_2.11-1.0-RC4.jar
+C:\Users\kreddy\.ivy2\cache\io.spray\spray-json_2.11\bundles\spray-json_2.11-1.3.1.jar
+C:\Users\kreddy\.ivy2\cache\com.typesafe.akka\akka-http-testkit-experimental_2.11\jars\akka-http-testkit-experimental_2.11-1.0-RC4.jar
+C:\Users\kreddy\.ivy2\cache\com.typesafe.akka\akka-testkit_2.11\jars\akka-testkit_2.11-2.3.11.jar
+
 */
