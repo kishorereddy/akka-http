@@ -17,6 +17,8 @@ import scala.concurrent.ExecutionContext
  * http://doc.akka.io/docs/akka/2.4.4/scala/http/routing-dsl/index.html
  * https://github.com/dnvriend/akka-http-test
  * http://chariotsolutions.com/blog/post/akka-http-getting-started/
+ * http://boldradius.com/blog-post/VNofuCYAACUAiO7w/how-to-configure-an-akka-cluster-on-amazon-ec2-instances-aws
+ * http://chrisloy.net/2014/05/11/akka-cluster-ec2-autoscaling.html
  */
 object WebApp extends App with Config with AppSupport with  Directives {
 
@@ -24,8 +26,8 @@ object WebApp extends App with Config with AppSupport with  Directives {
   protected implicit val executor: ExecutionContext = system.dispatcher
   protected implicit val materializer: ActorMaterializer = ActorMaterializer()
   protected val log: LoggingAdapter = Logging(system, getClass)
-  protected val _interface = "0.0.0.0"
-  protected val _port = 9911
+  protected val _interface = "::0"
+  protected val _port = 5000
 
 
   // start the server
@@ -74,7 +76,7 @@ object WebApp extends App with Config with AppSupport with  Directives {
   def setupViaCases(): Unit =
   {
     val requestHandler: (HttpRequest) => HttpResponse = Routes.exampleWithCases
-    Http().bindAndHandleSync(handler = requestHandler, interface = _interface, port = _port)
+    Http().bindAndHandleSync(handler = requestHandler, interface = _interface, port = getPort)
   }
 
 
@@ -84,7 +86,7 @@ object WebApp extends App with Config with AppSupport with  Directives {
   def setupViaFlow(): Unit =
   {
     val routes: Route = Routes.exampleWithTree()
-    Http().bindAndHandle(handler = routes, interface = _interface, port = _port)
+    Http().bindAndHandle(handler = routes, interface = _interface, port = getPort)
   }
 
 
@@ -94,7 +96,7 @@ object WebApp extends App with Config with AppSupport with  Directives {
   def setupViaDynamic(): Unit =
   {
     val routes = Routes.exampleWithModel("users")
-    Http().bindAndHandle(handler = routes, interface = _interface, port = _port)
+    Http().bindAndHandle(handler = routes, interface = _interface, port = getPort)
   }
 
 
@@ -105,7 +107,7 @@ object WebApp extends App with Config with AppSupport with  Directives {
   {
     var routes = Routes.exampleWithModel("users")
     routes = Routes.exampleWithAppendingRoutes(routes, this)
-    Http().bindAndHandle(handler = routes, interface = _interface, port = _port)
+    Http().bindAndHandle(handler = routes, interface = _interface, port = getPort)
   }
 
 
@@ -124,6 +126,11 @@ object WebApp extends App with Config with AppSupport with  Directives {
   def onAfterStartup():Unit =
   {
     println("after startup")
+  }
+
+  def getPort():Int = {
+    val txt = System.getenv().get("PORT")
+    Integer.parseInt(txt)
   }
 }
 

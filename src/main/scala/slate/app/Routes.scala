@@ -14,8 +14,10 @@ package slate.app
 
 import java.time.LocalDateTime
 import akka.actor.ActorSystem
+import akka.http.javadsl.model.headers.ContentType
 import akka.http.scaladsl.model.HttpMethods._
-import akka.http.scaladsl.model.{Uri, HttpResponse, HttpRequest, HttpEntity}
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server
 import akka.http.scaladsl.server._
 import akka.stream.ActorMaterializer
@@ -52,18 +54,19 @@ object Routes extends Directives
     get
     {
       // similar to "/"
+      // MediaTypes.`text/plain`.withCharset(HttpCharsets.`UTF-8`)
       pathSingleSlash {
-        complete(HttpEntity("<html><body>Hello world!</body></html>"))
+        complete("<html><body>Hello world 2!</body></html>")
       } ~
         path("ping") {
-          complete("DEPLOYED PONG !! " + LocalDateTime.now().toString())
+          complete("DEPLOYED PONG 2 !! " + LocalDateTime.now().toString())
         } ~
         path("users" / "register") {
-          complete("REGISTER !!")
+          complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, "REGISTER !!"))
         } ~
         path("users" / "verify") {
           //entity(as[User])
-          complete("VERIFY !!")
+          complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, "VERIFY !!"))
         } ~
         path("crash") {
           sys.error("BOOM !!")
@@ -71,7 +74,7 @@ object Routes extends Directives
     } ~
       post {
         path("users/getAll") {
-          complete("post only")
+          complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`,"post only"))
         }
       }
     routes
@@ -174,13 +177,13 @@ object Routes extends Directives
 
     // lets add some admin specific routes
     // HttpEntity(`application/json`, error._2)
-    val paths = route ~ post
+    val paths = route ~ get
     {
-      path ( "admin" / "status" / "about"   ) { ctx => Auth.ensureApiKey( ctx, (c) => completeAsHtml(c, asHtmlTable(app.about ) ) ) } ~
-      path ( "admin" / "status" / "host"    ) { ctx => Auth.ensureApiKey( ctx, (c) => completeAsHtml(c, asHtmlTable(app.host  ) ) ) } ~
-      path ( "admin" / "status" / "lang"    ) { ctx => Auth.ensureApiKey( ctx, (c) => completeAsHtml(c, asHtmlTable(app.lang  ) ) ) } ~
-      path ( "admin" / "status" / "info"    ) { ctx => Auth.ensureApiKey( ctx, (c) => completeAsHtml(c, asHtmlTable(app.info()) ) ) } ~
-      path ( "admin" / "status" / "infojs"  ) { ctx => Auth.ensureApiKey( ctx, (c) => completeAsJson(c, asJson(app.info()     ) ) ) }
+      path ( "admin" / "status" / "about"   ) { ctx => completeAsHtml(ctx, asHtmlTable(app.about ) ) } ~
+      path ( "admin" / "status" / "host"    ) { ctx => completeAsHtml(ctx, asHtmlTable(app.host  ) ) } ~
+      path ( "admin" / "status" / "lang"    ) { ctx => completeAsHtml(ctx, asHtmlTable(app.lang  ) ) } ~
+      path ( "admin" / "status" / "info"    ) { ctx => completeAsHtml(ctx, asHtmlTable(app.info()) ) } ~
+      path ( "admin" / "status" / "infojs"  ) { ctx => completeAsJson(ctx, asJson(app.info()     ) ) }
     }
 
     paths
